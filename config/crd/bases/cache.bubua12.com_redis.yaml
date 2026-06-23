@@ -59,16 +59,7 @@ spec:
             description: status defines the observed state of Redis
             properties:
               conditions:
-                description: |-
-                  conditions represent the current state of the Redis resource.
-                  Each condition has a unique type and reflects the status of a specific aspect of the resource.
-
-                  Standard condition types include:
-                  - "Available": the resource is fully functional
-                  - "Progressing": the resource is being created or updated
-                  - "Degraded": the resource failed to reach or maintain its desired state
-
-                  The status of each condition is one of True, False, or Unknown.
+                description: conditions represent the current state of the Redis resource.
                 items:
                   description: Condition contains details for one aspect of the current
                     state of this API Resource.
@@ -127,6 +118,13 @@ spec:
                 x-kubernetes-list-map-keys:
                 - type
                 x-kubernetes-list-type: map
+              readyReplicas:
+                description: readyReplicas 是当前就绪的 Redis 实例数量
+                format: int32
+                type: integer
+              state:
+                description: 'state 是当前 Redis 的状态: Creating / Running / Failed'
+                type: string
             type: object
         required:
         - spec
