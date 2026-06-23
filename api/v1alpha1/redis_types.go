@@ -30,9 +30,20 @@ type RedisSpec struct {
 	// The following markers will use OpenAPI v3 schema to validate the value
 	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
 
-	// foo is an example field of Redis. Edit redis_types.go to remove/update
+	// replicas 是 Redis 实例的数量
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:default=1
+	Replicas *int32 `json:"replicas,omitempty"`
+
+	// image 是 Redis 的容器镜像
+	// +kubebuilder:default="redis:7.2-alpine"
 	// +optional
-	Foo *string `json:"foo,omitempty"`
+	Image string `json:"image,omitempty"`
+
+	// port 是 Redis 的服务端口
+	// +kubebuilder:default=6379
+	// +optional
+	Port int32 `json:"port,omitempty"`
 }
 
 // RedisStatus defines the observed state of Redis.
