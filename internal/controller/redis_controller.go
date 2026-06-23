@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -47,9 +48,21 @@ type RedisReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.23.1/pkg/reconcile
 func (r *RedisReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	log := logf.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// 1. 获取 Redis 对象
+	redis := &cachev1alpha1.Redis{}
+	if err := r.Get(ctx, req.NamespacedName, redis); err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("Redis 资源已被删除，跳过")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	log.Info("开始处理 Redis", "name", redis.Name, "replicas", redis.Spec.Replicas)
+
+	// TODO: 后续步骤 - 创建 StatefulSet、Service 等
 
 	return ctrl.Result{}, nil
 }
