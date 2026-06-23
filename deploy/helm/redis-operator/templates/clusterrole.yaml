@@ -1,0 +1,50 @@
+{{- if .Values.rbac.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "redis-operator.fullname" . }}-manager-role
+  labels:
+    {{- include "redis-operator.labels" . | nindent 4 }}
+rules:
+# Redis CRD 权限
+- apiGroups: ["cache.bubua12.com"]
+  resources: ["redis"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["cache.bubua12.com"]
+  resources: ["redis/finalizers"]
+  verbs: ["update"]
+- apiGroups: ["cache.bubua12.com"]
+  resources: ["redis/status"]
+  verbs: ["get", "patch", "update"]
+# StatefulSet 权限
+- apiGroups: ["apps"]
+  resources: ["statefulsets"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+# Service 权限
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+# Leader 选举权限
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "redis-operator.fullname" . }}-leader-election-role
+  namespace: {{ include "redis-operator.namespace" . }}
+  labels:
+    {{- include "redis-operator.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+{{- end }}

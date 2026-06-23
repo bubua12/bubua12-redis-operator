@@ -1,0 +1,55 @@
+🎉 Redis Operator 安装成功！
+
+=== 部署信息 ===
+Operator: {{ include "redis-operator.fullname" . }}
+命名空间: {{ include "redis-operator.namespace" . }}
+镜像:     {{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}
+
+=== 验证安装 ===
+
+1. 检查 Operator Pod 是否运行：
+   kubectl get pods -n {{ include "redis-operator.namespace" . }}
+
+2. 查看 Operator 日志：
+   kubectl logs -f -n {{ include "redis-operator.namespace" . }} deployment/{{ include "redis-operator.fullname" . }}
+
+=== 创建 Redis 实例 ===
+
+创建一个 Redis 实例（3 个副本）：
+
+cat <<EOF | kubectl apply -f -
+apiVersion: cache.bubua12.com/v1alpha1
+kind: Redis
+metadata:
+  name: my-redis
+  namespace: default
+spec:
+  replicas: 3
+  image: redis:7.2-alpine
+  port: 6379
+EOF
+
+=== 查看 Redis 状态 ===
+
+# 查看 Redis 资源
+kubectl get redis
+
+# 查看 StatefulSet
+kubectl get statefulset
+
+# 查看 Pod
+kubectl get pods -l app=redis
+
+# 查看 Service
+kubectl get svc -l app=redis
+
+# 查看 Redis Status
+kubectl get redis my-redis -o yaml
+
+=== 卸载 ===
+
+# 卸载 Operator
+helm uninstall {{ .Release.Name }} -n {{ include "redis-operator.namespace" . }}
+
+# 卸载 CRD（注意：会删除所有 Redis 实例）
+kubectl delete crd redis.cache.bubua12.com

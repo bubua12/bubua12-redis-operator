@@ -1,0 +1,15 @@
+apiVersion: v2
+name: redis-operator
+description: A Kubernetes operator for managing Redis instances
+type: application
+version: 0.1.0
+appVersion: "0.0.1"
+keywords:
+  - redis
+  - operator
+  - kubernetes
+  - database
+home: https://github.com/bubua12/bubua12-redis-operator
+maintainers:
+  - name: bubua12
+    email: bubua12@example.com

@@ -1,0 +1,86 @@
+# Redis Operator Helm Chart - 默认配置
+
+# Operator 配置
+operator:
+  # 镜像配置
+  image:
+    repository: bubua12/redis-operator
+    tag: "v0.0.1"
+    pullPolicy: IfNotPresent
+
+  # 副本数（通常为 1，Leader 选举保证只有一个活跃）
+  replicas: 1
+
+  # 资源限制
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+  # Leader 选举
+  leaderElect: true
+
+  # 健康检查端口
+  healthProbeBindAddress: ":8081"
+
+  # Metrics 端口
+  metricsBindAddress: "0"
+
+  # 安全上下文
+  securityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  # Pod 安全上下文
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  # 节点选择器
+  nodeSelector: {}
+
+  # 容忍度
+  tolerations: []
+
+  # 亲和性
+  affinity: {}
+
+# 命名空间配置
+namespace:
+  # 是否创建命名空间
+  create: true
+  # 命名空间名称
+  name: redis-operator-system
+
+# RBAC 配置
+rbac:
+  # 是否创建 RBAC 资源
+  create: true
+
+# ServiceAccount 配置
+serviceAccount:
+  # 是否创建 ServiceAccount
+  create: true
+  # ServiceAccount 名称
+  name: controller-manager
+  # 额外的 annotations
+  annotations: {}
+
+# CRD 配置
+crd:
+  # 是否安装 CRD
+  create: true
+
+# 附加标签
+extraLabels: {}
+
+# 附加注解
+extraAnnotations: {}

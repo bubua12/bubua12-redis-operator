@@ -1,0 +1,9 @@
+{{- if .Values.namespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "redis-operator.namespace" . }}
+  labels:
+    {{- include "redis-operator.labels" . | nindent 4 }}
+    control-plane: controller-manager
+{{- end }}
