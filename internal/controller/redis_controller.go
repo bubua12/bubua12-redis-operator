@@ -81,6 +81,12 @@ func (r *RedisReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, err
 	}
 
+	// 4. 更新 Status
+	if err := r.updateStatus(ctx, redis); err != nil {
+		log.Error(err, "更新 Status 失败")
+		return ctrl.Result{}, err
+	}
+
 	log.Info("Redis 处理完成", "name", redis.Name)
 	return ctrl.Result{}, nil
 }
@@ -202,6 +208,40 @@ func (r *RedisReconciler) ensureService(ctx context.Context, redis *cachev1alpha
 	// Service 已存在，只更新端口配置
 	existing.Spec.Ports = desired.Spec.Ports
 	return r.Update(ctx, existing)
+}
+
+// updateStatus 读取 StatefulSet 的实际状态，更新到 Redis.Status
+func (r *RedisReconciler) updateStatus(ctx context.Context, redis *cachev1alpha1.Redis) error {
+	log := logf.FromContext(ctx)
+
+	// 读取 StatefulSet 的实际状态
+	sts := &appsv1.StatefulSet{}
+	if err := r.Get(ctx, client.ObjectKey{Name: redis.Name, Namespace: redis.Namespace}, sts); err != nil {
+		if errors.IsNotFound(err) {
+			// StatefulSet 还没创建完，状态设为 Creating
+			redis.Status.State = "Creating"
+			redis.Status.ReadyReplicas = 0
+			return r.Status().Update(ctx, redis)
+		}
+		return err
+	}
+
+	// 对比期望和实际，决定状态
+	redis.Status.ReadyReplicas = sts.Status.ReadyReplicas
+
+	if sts.Status.ReadyReplicas == *redis.Spec.Replicas {
+		redis.Status.State = "Running"
+	} else if sts.Status.ReadyReplicas > 0 {
+		redis.Status.State = "Progressing"
+	} else {
+		redis.Status.State = "Creating"
+	}
+
+	log.Info("更新 Status",
+		"readyReplicas", redis.Status.ReadyReplicas,
+		"state", redis.Status.State,
+	)
+	return r.Status().Update(ctx, redis)
 }
 
 // SetupWithManager sets up the controller with the Manager.

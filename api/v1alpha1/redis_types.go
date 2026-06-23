@@ -48,21 +48,13 @@ type RedisSpec struct {
 
 // RedisStatus defines the observed state of Redis.
 type RedisStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// readyReplicas 是当前就绪的 Redis 实例数量
+	ReadyReplicas int32 `json:"readyReplicas,omitempty"`
 
-	// For Kubernetes API conventions, see:
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
+	// state 是当前 Redis 的状态: Creating / Running / Failed
+	State string `json:"state,omitempty"`
 
 	// conditions represent the current state of the Redis resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
-	// The status of each condition is one of True, False, or Unknown.
 	// +listType=map
 	// +listMapKey=type
 	// +optional
